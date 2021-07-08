@@ -1,50 +1,68 @@
 import React from 'react';
 import { useState } from 'react';
 import { useReducer } from 'react';
-import { Button, FlatList, TextInput, View, Text } from 'react-native';
+import { Button, FlatList, TextInput, View, Text, TouchableOpacity } from 'react-native';
 import { useEffect } from 'react/cjs/react.development';
 
-const itemsReducer = function (state, action) {
-    switch (action.type) {
-        case 'ADD':
-            return [...state, action.payload];
-    }
-}
 
-const renderItem = function ({ item }) {
+
+const renderItem = function({ item }) {
     return (
         <View>
-            <Text>{item.nombre}</Text>
-            <Text>{item.edad}</Text>
-        </View>
+            <Text style={{fontSize: 25, fontWeight: '700'}}> {item.nombre} </Text>
+            <Text>
+                Edad calculada: {item.edadcal}, edad actual:{item.edad}
+            </Text>
+    </View>
     );
-
 }
 
 const UseReducerScreen = function () {
-    const [items, itemsDispatcher] = useReducer(itemsReducer, []);
+    const [items, itemsDispatcher] = useState([]);
 
-    const [edad, setEdad] = useState(0);
-    const [contador, modificar] = useState(0);
     const [nombre, setNombre] = useState('');
-    let x2 = items.edad*2;
-    useEffect(function(){
-        console.log('Hola');
-    },[x2]);
+    const [edad, setEdad] = useState(0);
+    const [edadcal, setEdadcal] = useState(0);
+    const [contador,setContador] = useState(0);
+
+    const add = () => {
+      itemsDispatcher(items.concat({ nombre, edad, edadcal: parseInt(edad) + parseInt(edadcal) }))
+    };
+
+    const sum = () => {
+      itemsDispatcher(items => {
+        let newitems = items.map((item, index) => {
+            item.edadcal = parseInt(item.edad) + parseInt(edadcal + 1);
+            return item
+        });
+        return newitems
+    })
+    setContador(contador+1);
+    setEdadcal(edadcal + 1);
+      };
+      const min = () => {
+        itemsDispatcher(items => {
+          let newitems = items.map((item, index) => {
+              item.edadcal = parseInt(item.edadcal) - 1;
+              return item
+          });
+          return newitems
+      })
+      setContador(contador-1);
+      setEdadcal(edadcal - 1);
+      };
 
     return (
         <View>
             <Text>Nombre</Text>
-            <TextInput onChangeText={text => setNombre(text)} />
+            <TextInput value={nombre} onChangeText={t  => setNombre(t)} />
             <Text>Edad</Text>
-            <TextInput onChangeText={text => setEdad(text)} />
-            <Button title="Agregar" onPress={() =>
-                itemsDispatcher({ type: 'ADD', payload: { edad, nombre } })
-            } />
-            <FlatList data={items} renderItem={renderItem} keyExtractor={item => item.edad} />
+            <TextInput value={edad} onChangeText={setEdad} />
+            <Button title="Agregar" onPress={add} />
+            <FlatList data={items} renderItem={renderItem}/>
             <Text>{contador}</Text>
-            <Button title="Incrementar" onPress={() => modificar(contador + 1)} />
-            <Button title="Decrementar" onPress={() => modificar(contador - 1)} />
+            <Button title="Incrementar" onPress={sum} />
+            <Button title="Decrementar" onPress={min} />
         </View>
     );
 }
